@@ -31,7 +31,6 @@ async def remove_task(message: types.Message):
 
 @dp.message_handler(commands=['l'])
 async def get_list(message: types.Message):
-	# Кастомные исключения доделать
 	task_list = db.get_list(message.chat.id)
 	if task_list:
 		msg = [str(i+1)+'. '+task_list[i]+'\n' for i in range(len(task_list))]
