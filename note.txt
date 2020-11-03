@@ -1,2 +1,0 @@
-
-https://github.com/alexey-goloburdin/telegram-finance-bot/blob/master/db.pydb.get_list()
