@@ -8,29 +8,30 @@ cursor = connection.cursor()
 
 def init_db():
 	"""Создает таблицу с тасками для пользователя, если она не была создана до этого"""
-	cursor.execute("CREATE TABLE IF NOT EXISTS tasks(chat_id INT, task TEXT)")
+	cursor.execute("CREATE TABLE IF NOT EXISTS tasks(chat_id INT, task_title TEXT, task_text TEXT)")
 	connection.commit()
 
-def add_task(chat_id:int, raw_msg:str):
-	"""Добавляет задачу в базу данных"""
-	task_text = _parse_message(raw_msg)
-	cursor.executemany("INSERT INTO tasks(chat_id, task) VALUES(?, ?)", [(chat_id, task_text)])
-	connection.commit()
+def insert(columns:dict):
+	"""
+	columns: Словарь с названием колонок и их значениями,
+	 которые нужно добавить в таблицу
+	"""
+	pass
 
-def remove_task(chat_id:int, raw_msg:str):
-	"""Удаляет задачу из базы данных"""
-	task_id = int(_parse_message(raw_msg))
-	task_text = get_list(chat_id)[task_id-1]
-	cursor.executemany("DELETE FROM tasks WHERE chat_id=? AND task=?", [(chat_id, task_text)])
-	connection.commit()
+def delete(columns:dict)->bool:
+	"""
+	columns: Словарь с названием колонок и их значениями.
+	 По этим данным происходит удаление строк из таблицы
+	return: Если что-то удалилось, то True. Если нет, False. 
+	"""
+	pass
 
-def get_list(chat_id:int)->list:
-	"""Выводит список задач"""
-	cursor.execute("SELECT task FROM tasks WHERE chat_id={}".format(chat_id))
-	response = cursor.fetchall()
-	return [task[0] for task in response]
-
-def _parse_message(raw_msg:str)->str:
-	return re.split(r'/\w* ', raw_msg)[1]
+def select(columns:dict)->List[Tuple]:
+	"""
+	columns: Словарь с названием колонок и их значениями.
+	 По этим данным ищутся строки из таблицы.
+	 
+	"""
+	pass
 
 init_db()
