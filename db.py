@@ -1,37 +1,47 @@
 """Работа с базой данных"""
 import sqlite3
 import os
-import re
-connection = sqlite3.connect(os.path.join('db', 'tasks.db'))
+from typing import NamedTuple
+
+connection = sqlite3.connect(os.path.join('db', 'tasks_db.db'))
 cursor = connection.cursor()
 
-
+#TODO: как хранить задачи и состояния вмсете?
+#Создать другую таблицу аалхаха
 def init_db():
-	"""Создает таблицу с тасками для пользователя, если она не была создана до этого"""
-	cursor.execute("CREATE TABLE IF NOT EXISTS tasks(chat_id INT, task_title TEXT, task_text TEXT)")
+	with open('creating_db.sql') as db:
+		db = db.read()
+		cursor.executescript(db)
+		connection.commit()
+
+def insert(table:str, payload:dict):
+	#TODO: Сюда бы трай эксцепт добавить на случай ввода неверных названий колонок
+	placeholders = ", ".join( "?" * len(payload.keys()) )
+	columns = ', '.join(payload.keys())
+	values = tuple(payload.values())
+	cursor.execute(f"INSERT INTO {table} ({columns}) VALUES ({placeholders})", values)
 	connection.commit()
 
-def insert(columns:dict):
-	"""
-	columns: Словарь с названием колонок и их значениями,
-	 которые нужно добавить в таблицу
-	"""
-	pass
+def delete(table:str, payload:dict)->bool:
+	column_value = ' AND '.join([f'{column}={value}' for column, value in payload.items()])
+	response = cursor.execute(
+		f"DELETE FROM {table} WHERE {colunm_value}")
+	print(response)
+	connection.commit()
 
-def delete(columns:dict)->bool:
-	"""
-	columns: Словарь с названием колонок и их значениями.
-	 По этим данным происходит удаление строк из таблицы
-	return: Если что-то удалилось, то True. Если нет, False. 
-	"""
-	pass
+def select(table:str, chat_id:int)->list:
+	cursor.execute(f"SELECT * FROM {table} WHERE chat_id={chat_id}")
+	return cursor.fetchall()
 
-def select(columns:dict)->List[Tuple]:
+def update(table:str, payload:dict, condition:dict):
 	"""
-	columns: Словарь с названием колонок и их значениями.
-	 По этим данным ищутся строки из таблицы.
-	 
+	payload:словарь формата {столбец: значение} со значениями,
+	 на которые нужно изменить
+	condition: словарь формата {столбец: значение},
+	 необходимый для поиска строки в которой будут изменяться значения 
 	"""
-	pass
-
+	column_value = ','.join([f'{column}={value}' for column, value in payload.items()])
+	condition = 'AND '.join([f'{column}={value}' for column, value in condition.items()])
+	cursor.execute(f"UPDATE {table} SET {column_value} WHERE {condition}")
+	
 init_db()
